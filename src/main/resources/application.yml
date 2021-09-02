@@ -1,1 +1,11 @@
-
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          facebook:
+            client-id: {client id here}
+            client-secret: {client secret here}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/friends"
+            scope: user_friends
