@@ -12,21 +12,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
                 .withUser("user")
-                .password(passwordEncoder().encode("pass"))
-                .roles("USER")
-                .and()
-                .withUser("user2")
-                .password(passwordEncoder().encode("pass"))
-                .roles("USER")
-                .and()
-                .withUser("user3")
                 .password(passwordEncoder().encode("pass"))
                 .roles("USER");
     }
@@ -37,19 +28,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
-
                 .oauth2Client()
                 .and()
-
                 .formLogin()
                 .and()
-
                 .logout()
                 .and()
-
                 .httpBasic()
                 .and()
-
                 .csrf().disable();
     }
 

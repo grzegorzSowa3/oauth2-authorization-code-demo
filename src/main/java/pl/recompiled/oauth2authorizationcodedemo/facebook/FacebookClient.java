@@ -1,4 +1,4 @@
-package pl.recompiled.oauth2authorizationcodedemo.facebook.http;
+package pl.recompiled.oauth2authorizationcodedemo.facebook;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -10,38 +10,40 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import pl.recompiled.oauth2authorizationcodedemo.FriendsProvider;
 import pl.recompiled.oauth2authorizationcodedemo.UserNotAuthorizedException;
+
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class FacebookClient {
+public class FacebookClient implements FriendsProvider {
 
     private final OAuth2AuthorizedClientService clientService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     private final String FRIENDS_URL = "https://graph.facebook.com/me/friends";
+    private final String CLIENT_ID = "facebook";
 
-    public FacebookUserFriendsResponse getUserFriends() {
-        HttpHeaders headers = httpHeaders();
+    @Override
+    public Set<FacebookFriend> getFriends() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", String.format("Bearer %s", accessToken()));
         return restTemplate.exchange(
                 FRIENDS_URL,
                 HttpMethod.GET,
                 new HttpEntity<Void>(headers),
-                FacebookUserFriendsResponse.class).getBody();
-    }
-
-    private HttpHeaders httpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", String.format("Bearer %s", accessToken()));
-        return headers;
+                FacebookUserFriendsResponse.class
+        ).getBody().getData();
     }
 
     private String accessToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient("facebook", authentication.getName());
+        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(CLIENT_ID, authentication.getName());
         if (client == null) {
-            throw new UserNotAuthorizedException("facebook");
+            throw new UserNotAuthorizedException(CLIENT_ID);
         }
         return client.getAccessToken().getTokenValue();
     }
+
 }
